@@ -1,0 +1,35 @@
+node_modules/
+dist/
+*.log
+
+# Environment files (contain server addresses / keys)
+.env
+.env.production
+.env.local
+
+# Nakama build output (regenerated from src)
+nakama/build/
+
+# Local binaries (downloaded separately)
+tools/
+
+# Mobile app
+mobile-app/.expo/
+mobile-app/android/
+mobile-app/ios/
+
+# Web app
+web-app/dist/
+
+# EAS build
+mobile-app/eas.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
