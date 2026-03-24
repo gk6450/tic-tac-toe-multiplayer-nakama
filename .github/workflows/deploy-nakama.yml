@@ -1,0 +1,42 @@
+name: Deploy Nakama to EC2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nakama/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.postgres.yml'
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/tic-tac-toe-multiplayer-nakama
+
+            echo "=== Pulling latest code ==="
+            git pull origin main
+
+            echo "=== Building Nakama module ==="
+            cd nakama
+            npm install --production=false
+            npx tsc
+            cd ..
+
+            echo "=== Restarting Nakama container ==="
+            docker compose -f docker-compose.yml up -d --force-recreate nakama
+
+            echo "=== Waiting for health check ==="
+            sleep 10
+            docker compose ps
+            echo "=== Deployment complete ==="

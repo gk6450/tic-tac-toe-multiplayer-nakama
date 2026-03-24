@@ -10,9 +10,6 @@ dist/
 # Nakama build output (regenerated from src)
 nakama/build/
 
-# Local binaries (downloaded separately)
-tools/
-
 # Mobile app
 mobile-app/.expo/
 mobile-app/android/
