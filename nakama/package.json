@@ -1,0 +1,14 @@
+{
+  "name": "tic-tac-toe-nakama",
+  "version": "1.0.0",
+  "description": "Nakama server-side TypeScript runtime for multiplayer Tic-Tac-Toe",
+  "scripts": {
+    "build": "npx tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "nakama-runtime": "github:heroiclabs/nakama-common"
+  }
+}
