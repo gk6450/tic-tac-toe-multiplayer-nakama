@@ -81,8 +81,9 @@ npx tsc
 echo "Build output: $REPO_DIR/nakama/build/index.js"
 
 echo ""
-echo "=== 6. Starting Services with Docker Compose ==="
+echo "=== 6. Building & Starting Services with Docker Compose ==="
 cd "$REPO_DIR"
+sudo docker compose -f docker-compose.yml build
 sudo docker compose -f docker-compose.yml up -d
 
 echo ""

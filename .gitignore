@@ -2,10 +2,11 @@ node_modules/
 dist/
 *.log
 
-# Environment files (contain server addresses / keys)
+# Environment files (local dev, may contain IPs)
 .env
-.env.production
 .env.local
+
+# Allow .env.production (contains only proxy flags, no secrets)
 
 # Nakama build output (regenerated from src)
 nakama/build/
