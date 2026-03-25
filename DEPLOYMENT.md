@@ -243,6 +243,9 @@ cd mobile-app
 
 # Build APK (preview profile)
 eas build --platform android --profile preview
+
+# Build APK (production profile)
+eas build --platform android --profile production
 ```
 
 When the build finishes (5-10 minutes), you'll get a download link for the `.apk` file.
