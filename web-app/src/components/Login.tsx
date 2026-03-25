@@ -132,7 +132,7 @@ export default function Login() {
 
         <p className="hint">
           {mode === 'quick'
-            ? 'No password needed — new or returning, just enter your username'
+            ? 'No password needed -new or returning, just enter your username'
             : isEmail
               ? 'Account is created automatically on first email login'
               : 'Log in with your username + password'}
