@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/gameview.tsx","./src/components/leaderboard.tsx","./src/components/lobby.tsx","./src/components/login.tsx","./src/context/nakamacontext.tsx","./src/game/phasergame.tsx","./src/game/tictactoescene.ts","./src/nakama/client.ts","./src/types/game.ts"],"version":"5.9.3"}
