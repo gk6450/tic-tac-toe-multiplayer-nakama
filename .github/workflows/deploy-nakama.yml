@@ -22,6 +22,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 30m
           script: |
             set -e
             cd ~/tic-tac-toe-multiplayer-nakama
@@ -41,6 +42,12 @@ jobs:
             cd nakama
             npm install --production=false
             npx tsc
+            cd ..
+
+            echo "=== Building web app ==="
+            cd web-app
+            npm ci
+            npm run build
             cd ..
 
             echo "=== Rebuilding and restarting services ==="

@@ -91,6 +91,13 @@ npx tsc
 echo "Build output: $REPO_DIR/nakama/build/index.js"
 
 echo ""
+echo "=== 5b. Building Web App ==="
+cd "$REPO_DIR/web-app"
+npm ci
+npm run build
+echo "Build output: $REPO_DIR/web-app/dist/"
+
+echo ""
 echo "=== 6. Building & Starting Services with Docker Compose ==="
 cd "$REPO_DIR"
 sudo docker compose -f docker-compose.yml build

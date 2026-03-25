@@ -8,6 +8,9 @@ dist/
 
 # Allow .env.production (contains only proxy flags, no secrets)
 
+# Ignore .env.production in mobile-app (contains IPs)
+mobile-app/.env.production
+
 # Nakama build output (regenerated from src)
 nakama/build/
 
