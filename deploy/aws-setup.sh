@@ -52,6 +52,14 @@ else
 fi
 
 echo ""
+echo "=== 2b. Installing/Updating Docker Buildx plugin ==="
+BUILDX_VERSION=$(curl -s https://api.github.com/repos/docker/buildx/releases/latest | grep tag_name | cut -d '"' -f 4)
+sudo curl -SL "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-$(uname -m)" \
+  -o /usr/local/lib/docker/cli-plugins/docker-buildx
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+echo "Docker Buildx installed: $(docker buildx version)"
+
+echo ""
 echo "=== 3. Installing Node.js 20 ==="
 if command -v node &> /dev/null; then
   echo "Node.js already installed: $(node --version)"
