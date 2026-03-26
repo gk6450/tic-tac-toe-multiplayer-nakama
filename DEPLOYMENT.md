@@ -244,6 +244,56 @@ EXPO_PUBLIC_NAKAMA_USE_SSL=false
 EXPO_PUBLIC_NAKAMA_HTTP_KEY=defaulthttpkey
 ```
 
+### Important: Android Cleartext Traffic
+
+Android 9+ blocks HTTP (non-HTTPS) requests by default. Since the mobile app connects to Nakama via `http://YOUR_EC2_IP:7350`, cleartext traffic must be explicitly allowed using the `expo-build-properties` plugin:
+
+```bash
+npx expo install expo-build-properties
+```
+
+Then in `app.json`, configure the plugin:
+
+```json
+"plugins": [
+  ["expo-build-properties", {
+    "android": {
+      "usesCleartextTraffic": true,
+      "enableMinifyInReleaseBuilds": true,
+      "enableShrinkResourcesInReleaseBuilds": true
+    }
+  }]
+]
+```
+
+| Property | Purpose |
+|----------|---------|
+| `usesCleartextTraffic` | Allows HTTP (non-HTTPS) network requests. Without this, the APK shows "Network request failed" on login. Remove if you add HTTPS/SSL later. |
+| `enableMinifyInReleaseBuilds` | Enables R8 code obfuscation and minification, stripping unused Java code to reduce APK size. |
+| `enableShrinkResourcesInReleaseBuilds` | Removes unused resources from the APK. Must be used together with `enableMinifyInReleaseBuilds`. |
+
+These optimizations typically reduce the APK size by **15-30%**. The Expo/React Native runtime itself is ~25-30 MB minimum, so that is the lower bound.
+
+Also bump `versionCode` in `app.json` for each new build (EAS requires incrementing version codes).
+
+### Asset Optimization
+
+Keep image assets small to minimize APK size. Recommended sizes:
+
+| Asset | Dimensions | Target Size |
+|-------|-----------|-------------|
+| `icon.png` | 1024x1024 | < 150 KB |
+| `android-icon-foreground.png` | 1024x1024 | < 150 KB |
+| `splash-icon.png` | 1024x1024 | < 100 KB |
+| `favicon.png` | 48x48 | < 10 KB |
+
+Use a tool like `sharp-cli` to compress:
+
+```bash
+npm install -g sharp-cli
+npx sharp-cli -i input.png -o output.png -f png -q 80 --palette --colors 128 --effort 6 -- resize 1024 1024
+```
+
 ### 4.1 Option A: EAS Cloud Build (Recommended)
 
 No local Android SDK needed. Builds run on Expo's servers.
@@ -260,7 +310,12 @@ cd mobile-app
 
 # Build APK (preview profile)
 eas build --platform android --profile preview
+
+# Build production APK
+eas build --platform android --profile production
 ```
+
+The `production` profile in `eas.json` has an `env` section where you set your EC2 Elastic IP. Alternatively, you can set env vars on the EAS dashboard under your project's "production" environment.
 
 When the build finishes (5-10 minutes), you'll get a download link for the `.apk` file.
 
@@ -270,6 +325,9 @@ Requires **Android SDK** and **JDK 17+** installed.
 
 ```bash
 cd mobile-app
+
+# Copy production env
+copy .env.production .env
 
 # Generate native Android project
 npx expo prebuild --platform android

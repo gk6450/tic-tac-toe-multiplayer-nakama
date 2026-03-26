@@ -22,13 +22,23 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.tictactoe.multiplayer",
-      "versionCode": 1
+      "versionCode": 4
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-screen-orientation"
+      "expo-screen-orientation",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
     ]
   }
 }
