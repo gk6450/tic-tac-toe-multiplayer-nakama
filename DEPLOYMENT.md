@@ -6,9 +6,9 @@ Complete step-by-step instructions for deploying the Tic-Tac-Toe multiplayer gam
 
 ## Table of Contents
 
-1. [Backend -- AWS EC2](#1-backend----aws-ec2) (includes Elastic IP setup)
+1. [Backend -- AWS EC2](#1-backend----aws-ec2) (includes swap setup, Elastic IP)
 2. [CI/CD -- GitHub Actions](#2-cicd----github-actions)
-3. [Web App -- Vercel](#3-web-app----vercel)
+3. [Web App](#3-web-app)
 4. [Mobile App -- Android APK](#4-mobile-app----android-apk)
 5. [Post-Deployment Checklist](#5-post-deployment-checklist)
 6. [Server Management](#6-server-management) (includes stop/start behavior table)
@@ -27,7 +27,7 @@ Complete step-by-step instructions for deploying the Tic-Tac-Toe multiplayer gam
    |---------|-------|
    | Name | `nakama-tic-tac-toe` |
    | AMI | Amazon Linux 2023 |
-   | Instance type | `t2.micro` (free tier) |
+   | Instance type | `t3.micro` (free tier) |
    | Key pair | Create new → download `.pem` file → keep it safe |
    | Network | Default VPC, auto-assign public IP = enabled |
 
@@ -46,7 +46,24 @@ Add these rules:
 | Custom TCP | 7350 | 0.0.0.0/0 | Nakama API (mobile app connects here) |
 | Custom TCP | 7351 | My IP | Nakama Console (admin only, restrict!) |
 
-### 1.3 Initial Server Setup
+### 1.3 Add Swap Space (Important for t2.micro)
+
+The `t3.micro` free-tier instance has only 1 GB RAM. Building the web app or running Docker can cause out-of-memory (OOM) crashes. **Add a 2 GB swap file immediately after first SSH login**:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Verify
+free -h
+```
+
+This persists across reboots. Without it, `npm run build` or `docker compose build` may hang or kill the instance.
+
+### 1.4 Initial Server Setup
 
 **Option A: Using the setup script (recommended)**
 
@@ -116,7 +133,7 @@ docker compose up -d
 docker compose ps
 ```
 
-### 1.4 Allocate an Elastic IP (Recommended)
+### 1.5 Allocate an Elastic IP (Recommended)
 
 By default, the public IP changes every time you stop and start the instance. An Elastic IP gives you a **permanent static IP** that survives stop/start cycles.
 
@@ -132,7 +149,7 @@ After associating, use this Elastic IP everywhere:
 - GitHub Secrets (`EC2_HOST`)
 - Vercel environment variables
 
-### 1.5 Verify Deployment
+### 1.6 Verify Deployment
 
 ```bash
 # From your local machine -- check Nakama health
@@ -243,9 +260,6 @@ cd mobile-app
 
 # Build APK (preview profile)
 eas build --platform android --profile preview
-
-# Build APK (production profile)
-eas build --platform android --profile production
 ```
 
 When the build finishes (5-10 minutes), you'll get a download link for the `.apk` file.
@@ -393,12 +407,31 @@ sudo systemctl start docker
 docker compose up -d
 ```
 
-### GitHub Actions: SSH connection refused
+### GitHub Actions: SSH connection refused / reset by peer
 
+- **Instance unresponsive (OOM)**: The most common cause. The previous build may have exhausted memory. Reboot the instance from **AWS Console > Instances > right-click > Reboot**. Then ensure swap is enabled (see section 1.3).
 - If you don't have an Elastic IP, the public IP changes on every stop/start -- update `EC2_HOST` secret
-- Use an Elastic IP (see section 1.4) to avoid this problem permanently
+- Use an Elastic IP (see section 1.5) to avoid IP changes permanently
 - Check security group allows port 22 from GitHub's IP ranges (or use `0.0.0.0/0` for port 22 temporarily)
 - Verify `EC2_SSH_KEY` includes the full `.pem` content with headers
+
+### EC2: Build hangs or instance becomes unresponsive
+
+This happens when `npm run build` or `docker compose build` exhausts memory on `t3.micro` (1 GB RAM).
+
+```bash
+# Check if swap is enabled
+free -h
+
+# If swap shows 0, add a swap file (see section 1.3)
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+If the instance is unresponsive, reboot from the AWS Console, then add swap before retrying.
 
 ### Web app can't connect to Nakama
 
